@@ -12,7 +12,7 @@
 
 *MENTOR*: NEELA SANTOSH
 
-*The developed program is a web-based Quiz Application named “QuizMaster” designed to test and improve users’ knowledge through an interactive and user-friendly interface. The application allows users to select different categories such as Science, History, Technology, Geography, or a Mixed category and attempt a set of multiple-choice questions. Each quiz consists of 10 questions, and users are given a limited time of 15 seconds to answer each question, making the experience engaging and time-bound.
+The developed program is a web-based Quiz Application named “QuizMaster” designed to test and improve users’ knowledge through an interactive and user-friendly interface. The application allows users to select different categories such as Science, History, Technology, Geography, or a Mixed category and attempt a set of multiple-choice questions. Each quiz consists of 10 questions, and users are given a limited time of 15 seconds to answer each question, making the experience engaging and time-bound.
 
 The application is built using HTML, CSS, and JavaScript, which are core front-end web development technologies. HTML is used to structure the content of the application, including different screens such as the start screen, quiz screen, and result screen. CSS is used to design and enhance the visual appearance of the application, providing a modern and responsive user interface with styled buttons, cards, animations, and layouts. JavaScript is used to implement the main functionality of the quiz, including question loading, answer validation, timer control, score calculation, and dynamic content updates.
 
@@ -24,4 +24,11 @@ At the end of the quiz, a result screen is displayed showing the user’s perfor
 
 This application can be used in various fields such as education, self-assessment, e-learning platforms, and corporate training. It is particularly useful for students to practice quizzes, teachers to conduct online tests, and organizations to evaluate knowledge in an interactive way.
 
-In conclusion, the QuizMaster application is a simple yet effective web-based system that demonstrates important concepts of front-end development such as DOM manipulation, event handling, timers, and dynamic user interaction. It serves as a practical tool for learning and assessment while providing an engaging user experience.*
+In conclusion, the QuizMaster application is a simple yet effective web-based system that demonstrates important concepts of front-end development such as DOM manipulation, event handling, timers, and dynamic user interaction. It serves as a practical tool for learning and assessment while providing an engaging user experience.
+
+OUTPUT:
+<img width="1920" height="1080" alt="Image" src="https://github.com/user-attachments/assets/18d4a39f-1264-4580-8206-bdb48a1e291a" />
+
+<img width="1920" height="1080" alt="Image" src="https://github.com/user-attachments/assets/9789aefe-0cf7-46ce-aff2-0d7e732c290b" />
+
+<img width="1920" height="1080" alt="Image" src="https://github.com/user-attachments/assets/b9513949-ef63-41c4-8c2a-5267d1f7710e" />
