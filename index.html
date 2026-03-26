@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuizMaster</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--s:#13131a;--s2:#1c1c27;--b:#2a2a3a;--a:#ff5e3a;--a2:#ffb347;--a3:#4af7c4;--t:#f0f0f5;--m:#6b6b80;--ok:#4af7c4;--no:#ff4f6b}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.screen{display:none;width:100%;max-width:680px;animation:up .4s ease}
+.screen.active{display:block}
+@keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.card{background:var(--s);border:1px solid var(--b);border-radius:24px;padding:40px 44px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--a),var(--a2),var(--a3))}
+h1{font-size:clamp(32px,6vw,52px);font-weight:800;letter-spacing:-.02em;margin-bottom:12px}
+h1 span{color:var(--a)}
+p.desc{color:var(--m);font-size:14px;line-height:1.7;margin-bottom:28px}
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:32px}
+.chip{background:var(--s2);border:1px solid var(--b);border-radius:12px;padding:12px 18px;flex:1;min-width:90px;text-align:center}
+.chip b{font-size:20px;font-weight:800;color:var(--a2);display:block}
+.chip small{font-size:10px;color:var(--m);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em}
+.lbl{font-family:'DM Mono',monospace;font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:28px}
+.cat{background:var(--s2);border:1.5px solid var(--b);border-radius:12px;padding:12px;color:var(--t);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px}
+.cat:hover,.cat.on{border-color:var(--a);color:var(--a);background:rgba(255,94,58,.1)}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--a);color:#fff;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;padding:14px 28px;border-radius:12px;border:none;cursor:pointer;transition:all .2s}
+.btn:hover{background:#ff7a5a;transform:translateY(-1px);box-shadow:0 8px 24px rgba(255,94,58,.3)}
+.btn.out{background:transparent;border:1.5px solid var(--b);color:var(--m)}
+.btn.out:hover{border-color:var(--a);color:var(--a);box-shadow:none;transform:none}
+.qhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.qcnt{font-family:'DM Mono',monospace;font-size:12px;color:var(--m)}
+.qcnt strong{color:var(--t)}
+.tmr{display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--b);border-radius:99px;padding:6px 14px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--a3);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+#td{font-family:'DM Mono',monospace;font-size:13px;color:var(--a2);min-width:24px;text-align:center}
+#td.red{color:var(--no)}
+.bar{height:4px;background:var(--b);border-radius:99px;margin-bottom:24px;overflow:hidden}
+.fill{height:100%;background:linear-gradient(90deg,var(--a),var(--a2));border-radius:99px;transition:width .4s}
+.qtag{font-family:'DM Mono',monospace;font-size:10px;color:var(--a3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+#qt{font-size:clamp(16px,3vw,20px);font-weight:700;line-height:1.5;margin-bottom:22px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+@media(max-width:460px){.opts{grid-template-columns:1fr}}
+.opt{background:var(--s2);border:1.5px solid var(--b);border-radius:12px;padding:14px 16px;color:var(--t);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-align:left;transition:all .18s;display:flex;align-items:flex-start;gap:10px;line-height:1.4}
+.opt:not(.locked):hover{border-color:var(--a);background:rgba(255,94,58,.07)}
+.ol{flex-shrink:0;width:24px;height:24px;border-radius:7px;background:var(--b);display:grid;place-items:center;font-family:'DM Mono',monospace;font-size:10px;color:var(--m)}
+.opt.correct{border-color:var(--ok);background:rgba(74,247,196,.08);color:var(--ok)}
+.opt.correct .ol{background:var(--ok);color:#000}
+.opt.wrong{border-color:var(--no);background:rgba(255,79,107,.08);color:var(--no)}
+.opt.wrong .ol{background:var(--no);color:#fff}
+#fb{display:none;background:var(--s2);border-radius:12px;padding:14px 18px;margin-bottom:18px;border-left:3px solid var(--a);font-size:13px;line-height:1.6;color:var(--m)}
+#fb.show{display:block}
+#fb.ok{border-color:var(--ok);color:var(--ok)}
+#fb.bad{border-color:var(--no)}
+#fb strong{color:var(--t)}
+.qfoot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.smini{font-family:'DM Mono',monospace;font-size:11px;color:var(--m)}
+.smini span{color:var(--a2)}
+.rhero{text-align:center;margin-bottom:28px}
+.remoji{font-size:56px;display:block;margin-bottom:12px}
+.rgrade{font-size:64px;font-weight:800;background:linear-gradient(135deg,var(--a),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.rmsg{font-size:18px;font-weight:700;margin-bottom:6px}
+.rlbl{font-size:12px;color:var(--m);margin-bottom:4px}
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px}
+.sbox{background:var(--s2);border:1px solid var(--b);border-radius:14px;padding:18px;text-align:center}
+.sbox .n{font-size:26px;font-weight:800}
+.sbox .n.g{color:var(--ok)}.sbox .n.r{color:var(--no)}.sbox .n.o{color:var(--a2)}
+.sbox .t{font-size:10px;color:var(--m);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
+.rvlist{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+.rvi{display:flex;align-items:flex-start;gap:10px;background:var(--s2);border-radius:10px;padding:12px 14px;font-size:12px;line-height:1.5}
+.rvi .ri{font-size:14px;flex-shrink:0}
+.rvi .rq{color:var(--m)}.rvi .ra{color:var(--t);font-weight:600}
+.acts{display:flex;gap:10px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<div class="screen active" id="s-start">
+  <div class="card">
+    <h1>Test Your<br><span>Knowledge</span></h1>
+    <p class="desc">Answer questions, get instant feedback, and track your score. 15 seconds per question.</p>
+    <div class="chips">
+      <div class="chip"><b>10</b><small>Questions</small></div>
+      <div class="chip"><b>15s</b><small>Per Q</small></div>
+      <div class="chip"><b>4</b><small>Categories</small></div>
+    </div>
+    <p class="lbl">Choose a category</p>
+    <div class="cats">
+      <button class="cat on" data-cat="mixed">🎲 Mixed</button>
+      <button class="cat" data-cat="science">🔬 Science</button>
+      <button class="cat" data-cat="history">📜 History</button>
+      <button class="cat" data-cat="tech">💻 Tech</button>
+      <button class="cat" data-cat="geo">🌍 Geography</button>
+    </div>
+    <button class="btn" id="start-btn">▶ Start Quiz</button>
+  </div>
+</div>
+
+<div class="screen" id="s-quiz">
+  <div class="card">
+    <div class="qhead">
+      <div class="qcnt">Question <strong id="qn">1</strong> of <strong id="qt2">10</strong></div>
+      <div class="tmr"><div class="dot"></div><div id="td">15</div></div>
+    </div>
+    <div class="bar"><div class="fill" id="fill" style="width:0%"></div></div>
+    <div class="qtag"><span id="qci">🎲</span> <span id="qcl">Mixed</span></div>
+    <p id="qt">...</p>
+    <div class="opts" id="opts"></div>
+    <div id="fb"></div>
+    <div class="qfoot">
+      <div class="smini">Score: <span id="sd">0</span></div>
+      <button class="btn" id="next-btn" style="display:none">Next ›</button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="s-result">
+  <div class="card">
+    <div class="rhero">
+      <span class="remoji" id="re">🏆</span>
+      <div class="rlbl">Your Score</div>
+      <div class="rgrade" id="rg">0%</div>
+      <div class="rmsg" id="rm"></div>
+    </div>
+    <div class="sgrid">
+      <div class="sbox"><div class="n g" id="rc">0</div><div class="t">Correct</div></div>
+      <div class="sbox"><div class="n r" id="rw">0</div><div class="t">Wrong</div></div>
+      <div class="sbox"><div class="n o" id="rt">0s</div><div class="t">Avg Time</div></div>
+    </div>
+    <p class="lbl" style="margin-bottom:10px">Review</p>
+    <div class="rvlist" id="rvlist"></div>
+    <div class="acts">
+      <button class="btn" id="retry-btn">↺ Play Again</button>
+      <button class="btn out" id="home-btn">⌂ Home</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const Q={
+  science:[
+    {q:"Chemical symbol for Gold?",o:["Go","Gd","Au","Ag"],a:2,e:"Au comes from the Latin 'Aurum'."},
+    {q:"Speed of light in vacuum?",o:["300,000 km/s","150,000 km/s","450,000 km/s","600,000 km/s"],a:0,e:"Approximately 299,792 km/s."},
+    {q:"DNA stands for?",o:["Deoxyribonucleic Acid","Dinitrogen Acetate","Dioxin Naphthyl Acid","Dipolar Nucleic Antigen"],a:0,e:"Deoxyribonucleic Acid."},
+    {q:"Planet with the most moons?",o:["Jupiter","Saturn","Uranus","Neptune"],a:1,e:"Saturn has 146 known moons."},
+    {q:"Atomic number of Carbon?",o:["4","6","8","12"],a:1,e:"Carbon has 6 protons."},
+    {q:"Photosynthesis produces which gas?",o:["CO₂","N₂","O₂","H₂"],a:2,e:"Plants release oxygen (O₂)."},
+    {q:"Which organ produces insulin?",o:["Liver","Kidney","Stomach","Pancreas"],a:3,e:"The pancreas secretes insulin."},
+    {q:"Absolute zero in Celsius?",o:["-100°C","-173°C","-273°C","-373°C"],a:2,e:"0 K = −273.15°C."},
+  ],
+  history:[
+    {q:"Year WWII ended?",o:["1943","1944","1945","1946"],a:2,e:"WWII ended in 1945."},
+    {q:"First US President?",o:["John Adams","Thomas Jefferson","George Washington","Benjamin Franklin"],a:2,e:"George Washington, 1789–1797."},
+    {q:"Great Wall built mainly during which dynasty?",o:["Han","Tang","Ming","Qing"],a:2,e:"Mostly built during the Ming Dynasty."},
+    {q:"French Revolution began in?",o:["1776","1789","1799","1812"],a:1,e:"1789, storming of the Bastille."},
+    {q:"First person to walk on the Moon?",o:["Buzz Aldrin","Yuri Gagarin","Neil Armstrong","John Glenn"],a:2,e:"Neil Armstrong, July 20, 1969."},
+    {q:"Cold War: which two nations?",o:["UK & Germany","USA & China","USA & USSR","France & Germany"],a:2,e:"USA and USSR, 1947–1991."},
+    {q:"Renaissance originated in?",o:["France","England","Germany","Italy"],a:3,e:"Began in Italy in the 14th century."},
+    {q:"Who wrote the Declaration of Independence?",o:["Franklin","Adams","Jefferson","Hamilton"],a:2,e:"Thomas Jefferson, drafted June 1776."},
+  ],
+  tech:[
+    {q:"CPU stands for?",o:["Core Processing Unit","Central Processing Unit","Computer Power Unit","Central Program Utility"],a:1,e:"Central Processing Unit."},
+    {q:"Language that runs natively in browsers?",o:["Python","Java","JavaScript","Ruby"],a:2,e:"JavaScript runs in all modern browsers."},
+    {q:"HTTP stands for?",o:["HyperText Transfer Protocol","High Traffic Text Protocol","Hosted Terminal Transfer Protocol","HyperText Transmission Process"],a:0,e:"HyperText Transfer Protocol."},
+    {q:"Binary 1010 in decimal?",o:["8","10","12","14"],a:1,e:"8+2 = 10."},
+    {q:"RAM stands for?",o:["Read Access Memory","Random Access Memory","Rapid Application Memory","Remote Access Module"],a:1,e:"Random Access Memory."},
+    {q:"Python was created by?",o:["Google","Microsoft","Guido van Rossum","Sun Microsystems"],a:2,e:"Guido van Rossum, first released 1991."},
+    {q:"Data structure using LIFO?",o:["Queue","Stack","Tree","Graph"],a:1,e:"Stack = Last In, First Out."},
+    {q:"Git was created by?",o:["Linus Torvalds","Dennis Ritchie","James Gosling","Brendan Eich"],a:0,e:"Linus Torvalds created Git in 2005."},
+  ],
+  geo:[
+    {q:"Capital of Australia?",o:["Sydney","Melbourne","Canberra","Brisbane"],a:2,e:"Canberra is Australia's capital."},
+    {q:"Longest river in the world?",o:["Amazon","Mississippi","Nile","Yangtze"],a:2,e:"The Nile, ~6,650 km."},
+    {q:"Mount Everest is in which range?",o:["Andes","Alps","Himalayas","Rockies"],a:2,e:"The Himalayas on the Nepal–Tibet border."},
+    {q:"Smallest country in the world?",o:["Monaco","San Marino","Vatican City","Liechtenstein"],a:2,e:"Vatican City, 0.44 km²."},
+    {q:"Largest ocean?",o:["Atlantic","Indian","Arctic","Pacific"],a:3,e:"The Pacific covers ~165 million km²."},
+    {q:"Sahara Desert is in?",o:["Asia","South America","North Africa","Australia"],a:2,e:"North Africa."},
+    {q:"Country with most natural lakes?",o:["Russia","USA","Brazil","Canada"],a:3,e:"Canada has ~60% of world's lakes."},
+    {q:"'The Big Apple' refers to?",o:["Los Angeles","Chicago","New York City","San Francisco"],a:2,e:"New York City."},
+  ],
+};
+Q.mixed=[...Q.science.slice(0,3),...Q.history.slice(0,2),...Q.tech.slice(0,3),...Q.geo.slice(0,2)];
+const CI={mixed:"🎲 Mixed",science:"🔬 Science",history:"📜 History",tech:"💻 Tech",geo:"🌍 Geography"};
+
+let cat='mixed',qs=[],qi=0,score=0,ok=0,bad=0,answered=false,timer=null,tl=15,times=[],t0=0,log=[];
+
+document.querySelectorAll('.cat').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.cat').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); cat=b.dataset.cat;
+});
+document.getElementById('start-btn').onclick=startQuiz;
+document.getElementById('next-btn').onclick=nextQ;
+document.getElementById('retry-btn').onclick=()=>show('s-start');
+document.getElementById('home-btn').onclick=()=>show('s-start');
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function startQuiz(){
+  qs=shuffle([...Q[cat]]).slice(0,10);
+  qi=score=ok=bad=0; times=[]; log=[];
+  document.getElementById('qt2').textContent=qs.length;
+  show('s-quiz'); loadQ();
+}
+
+function loadQ(){
+  answered=false; const q=qs[qi]; t0=Date.now();
+  const [icon,...rest]=CI[cat].split(' ');
+  document.getElementById('qn').textContent=qi+1;
+  document.getElementById('qci').textContent=icon;
+  document.getElementById('qcl').textContent=rest.join(' ');
+  document.getElementById('qt').textContent=q.q;
+  document.getElementById('sd').textContent=score;
+  document.getElementById('next-btn').style.display='none';
+  document.getElementById('fill').style.width=(qi/qs.length*100)+'%';
+  const fb=document.getElementById('fb'); fb.className=''; fb.textContent='';
+  const grid=document.getElementById('opts'); grid.innerHTML='';
+  ['A','B','C','D'].forEach((l,i)=>{
+    const b=document.createElement('button');
+    b.className='opt';
+    b.innerHTML=`<span class="ol">${l}</span>${q.o[i]}`;
+    b.onclick=()=>pick(i,b); grid.appendChild(b);
+  });
+  startTimer();
+}
+
+function startTimer(){
+  clearInterval(timer); tl=15;
+  const el=document.getElementById('td');
+  el.classList.remove('red'); el.textContent=tl;
+  timer=setInterval(()=>{
+    el.textContent=--tl;
+    if(tl<=5)el.classList.add('red');
+    if(tl<=0){clearInterval(timer);timeUp();}
+  },1000);
+}
+
+function timeUp(){
+  if(answered)return; answered=true;
+  const q=qs[qi]; reveal(q.a,-1);
+  setFb(`⏰ <strong>Time's up!</strong> Correct: <strong>${q.o[q.a]}</strong>. ${q.e}`,'bad');
+  log.push({q:q.q,ok:false,your:'—',right:q.o[q.a]}); bad++; times.push(15);
+  document.getElementById('next-btn').style.display='inline-flex';
+}
+
+function pick(i){
+  if(answered)return; answered=true; clearInterval(timer);
+  times.push(Math.round((Date.now()-t0)/1000));
+  const q=qs[qi]; reveal(q.a,i);
+  if(i===q.a){
+    const pts=Math.max(10,10+tl*2); score+=pts; ok++;
+    setFb(`✅ <strong>Correct! +${pts} pts</strong> — ${q.e}`,'ok');
+    log.push({q:q.q,ok:true,your:q.o[i],right:q.o[q.a]});
+  } else {
+    bad++;
+    setFb(`❌ <strong>Wrong!</strong> Correct: <strong>${q.o[q.a]}</strong>. ${q.e}`,'bad');
+    log.push({q:q.q,ok:false,your:q.o[i],right:q.o[q.a]});
+  }
+  document.getElementById('sd').textContent=score;
+  document.getElementById('next-btn').style.display='inline-flex';
+}
+
+function setFb(html,cls){const fb=document.getElementById('fb');fb.className='show '+cls;fb.innerHTML=html;}
+function reveal(correct,chosen){document.querySelectorAll('.opt').forEach((b,i)=>{b.classList.add('locked');if(i===correct)b.classList.add('correct');else if(i===chosen)b.classList.add('wrong');})}
+function nextQ(){if(++qi>=qs.length)showResults();else loadQ();}
+
+function showResults(){
+  clearInterval(timer);
+  const pct=Math.round(ok/qs.length*100);
+  const avg=times.length?Math.round(times.reduce((a,b)=>a+b,0)/times.length):0;
+  const [,emoji,msg]=[[90,'🏆','Outstanding!'],[70,'🎉','Great work!'],[50,'👍','Good effort!'],[-1,'📚','Keep practising!']].find(([t])=>pct>=t);
+  document.getElementById('re').textContent=emoji;
+  document.getElementById('rg').textContent=pct+'%';
+  document.getElementById('rm').textContent=msg;
+  document.getElementById('rc').textContent=ok;
+  document.getElementById('rw').textContent=bad;
+  document.getElementById('rt').textContent=avg+'s';
+  const list=document.getElementById('rvlist'); list.innerHTML='';
+  log.forEach(r=>{
+    const d=document.createElement('div'); d.className='rvi';
+    d.innerHTML=`<span class="ri">${r.ok?'✅':'❌'}</span><div><div class="rq">${r.q}</div><div class="ra">${r.ok?r.your:`Yours: ${r.your} · Correct: ${r.right}`}</div></div>`;
+    list.appendChild(d);
+  });
+  document.getElementById('fill').style.width='100%';
+  show('s-result');
+}
+</script>
+</body>
+</html>
